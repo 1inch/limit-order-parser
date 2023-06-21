@@ -21,3 +21,11 @@
     height: 300px;
 }
 
+.permit-group {
+    display: flex;
+}
+
+.permit-group .predicate {
+    flex: 1
+}
+

@@ -1,4 +1,9 @@
-import { LimitOrderDecoder, ZX, LimitOrderPredicateDecoder } from '@1inch/limit-order-protocol-utils'
+import {
+    LimitOrderDecoder,
+    ZX,
+    LimitOrderPredicateDecoder,
+    Web3ProviderConnector, LimitOrderProtocolFacade
+} from '@1inch/limit-order-protocol-utils'
 import Web3 from 'web3';
 import { get } from 'lodash';
 
@@ -12,20 +17,13 @@ export const binanceMainContracts = {
     loSeriesNonceManager: '0x58ce0e6ef670c9a05622f4188faa03a9e12ee2e4',
 };
 
-let web3;
+const addressMap = new Map([
+    [1, ethereumMainContracts],
+    [56, binanceMainContracts]
+])
 
-const testedData = {
-        "salt": "270063368253",
-        "makerAsset": "0x1af3f329e8be154074d8769d1ffa4ee058b1dbc3",
-        "takerAsset": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
-        "maker": "0x6ab9c477246bcaa4a1c3a825f42437ef66c55953",
-        "receiver": "0x0000000000000000000000000000000000000000",
-        "allowedSender": "0x0000000000000000000000000000000000000000",
-        "makingAmount": "1000000000000000000",
-        "takingAmount": "3074476000000000",
-        "offsets": "4421431254442149611168492388118363282642987198110904030635476664713216",
-        "interactions": "0xbf15fcd800000000000000000000000058ce0e6ef670c9a05622f4188faa03a9e12ee2e4000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000242cc2878d00645550dc000000000000006ab9c477246bcaa4a1c3a825f42437ef66c5595300000000000000000000000000000000000000000000000000000000"
-    };
+let web3;
+let facade;
 
 async function  connectWeb3() {
     if (typeof window.ethereum !== 'undefined') {
@@ -45,37 +43,81 @@ async function parseOrder() {
     const networkId = await web3.eth.net.getId();
 
     const orderField = document.querySelector('#order')
-    orderField.value = JSON.stringify(testedData);
     const parsed = JSON.parse(orderField.value);
 
-    const result = LimitOrderDecoder.unpackInteractions(parsed.offsets, parsed.interactions);
-    for (const field of Object.keys(result)) {
-        const fieldElement = document.querySelector(`#${field}`);
-        if (fieldElement) {
-            fieldElement.value = result[field];
+    if (parsed.interaction !== ZX) {
+        const result = LimitOrderDecoder.unpackInteractions(parsed.offsets, parsed.interactions);
+        for (const field of Object.keys(result)) {
+            const fieldElement = document.querySelector(`#${field}`);
+            if (fieldElement) {
+                fieldElement.value = result[field];
+            }
         }
+
+        const limitOrderPredicateDecoder = new LimitOrderPredicateDecoder(networkId);
+
+        if (result.predicate && result.predicate !== ZX) {
+            const contractAddress = addressMap.get(networkId).limitOrder;
+            facade = getLimitOrderProtocolFacade(networkId, contractAddress);
+            const success = await simulateResult(contractAddress, result.predicate);
+            if (typeof success === 'boolean') {
+                const validField = document.querySelector(`#simulate-result`);
+                validField.value = success;
+            }
+
+            const isValid = await checkPredicate(parsed)
+            const validField = document.querySelector(`#check-predicate`);
+            validField.value = isValid;
+
+            const ast = limitOrderPredicateDecoder.decode(result.predicate);
+
+            const { nonce, timestamp, series } = getExpiration(
+                limitOrderPredicateDecoder,
+                ast,
+            );
+
+            const timestampField = document.querySelector(`#timestamp`);
+            if (timestampField && timestamp) {
+                timestampField.value = (new Date(timestamp * 1000))
+            }
+
+            const nonceField = document.querySelector(`#nonce`);
+            if (nonceField && !isNaN(nonce)) {
+                nonceField.value = nonce;
+            }
+
+            const seriesField = document.querySelector(`#series`);
+            if (seriesField && !isNaN(series)) {
+                seriesField.value = series;
+            }
+        }
+    } else {
+        alert('Interaction is empty!')
     }
+}
 
-    const limitOrderPredicateDecoder = new LimitOrderPredicateDecoder(networkId);
+async function checkPredicate(order) {
+    return facade.checkPredicate(order);
+}
 
-    if (result.predicate && result.predicate !== ZX) {
-        const ast = limitOrderPredicateDecoder.decode(result.predicate);
-
-        const { nonce, timestamp } = getExpiration(
-            limitOrderPredicateDecoder,
-            ast,
-        );
-
-        const timestampField = document.querySelector(`#timestamp`);
-        if (timestampField && timestamp) {
-            timestampField.value = (new Date(timestamp * 1000))
-        }
-
-        const nonceField = document.querySelector(`#nonce`);
-        if (nonceField && !isNaN(nonce)) {
-            nonceField.value = nonce;
-        }
+async function simulateResult(contractAddress, predicate) {
+    try {
+        const { success } = await facade.simulate(contractAddress, predicate);
+        return success;
+    } catch (e) {
+        return false;
     }
+}
+
+function getLimitOrderProtocolFacade(chainId, contractAddress) {
+    const connector = getProvideConnector();
+    return  new LimitOrderProtocolFacade(
+        contractAddress, chainId, connector
+    );
+}
+
+function getProvideConnector() {
+    return new Web3ProviderConnector(web3)
 }
 
 export function getExpiration(
@@ -96,7 +138,6 @@ export function getExpiration(
 
     const node = limitOrderPredicateDecoder.findFirstDFS(predicate, matcher);
 
-    debugger
     if (!node) {
         throw new Error('No nonce predicate found in order.');
     }
@@ -104,6 +145,7 @@ export function getExpiration(
     return  {
         timestamp: +get(node, 'args.timestamp.bytes'),
         nonce: +get(node, 'args.nonce.bytes'),
+        series: +get(node, 'args.series.bytes')
     };
 }
 
