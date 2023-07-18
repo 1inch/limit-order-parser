@@ -123,7 +123,6 @@ function getProvideConnector() {
 export function getExpiration(
     limitOrderPredicateDecoder,
     predicate,
-    nonceManagerAddress,
 ) {
     const matcher = (node) => {
         if (
