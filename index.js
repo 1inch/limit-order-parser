@@ -6,6 +6,7 @@ import {
 } from '@1inch/limit-order-protocol-utils'
 import Web3 from 'web3';
 import { get } from 'lodash';
+import {AuctionSalt, AuctionSuffix} from "@1inch/fusion-sdk";
 
 export const ethereumMainContracts = {
     limitOrder: '0x1111111254eeb25477b68fb85ed929f73a960582',
@@ -152,6 +153,22 @@ export function getExpiration(
 document.addEventListener('DOMContentLoaded', () => {
     const button = document.querySelector('#parseOrderBtn');
     button.addEventListener('click', parseOrder);
+});
+
+async function parseFusionOrder() {
+    const orderTextArea = document.querySelector('#fuison-order')
+    const order = JSON.parse(orderTextArea.value);
+
+    const decodedSalt = AuctionSalt.decode(order.salt);
+    document.getElementById("fusionSalt").innerHTML = JSON.stringify(decodedSalt);
+
+    const decodedSuffix = AuctionSuffix.decode(order.interactions);
+    document.getElementById("fusionInteractions").innerHTML = JSON.stringify(decodedSuffix);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const button = document.querySelector('#parseFusionOrderBtn');
+    button.addEventListener('click', parseFusionOrder);
 });
 
 

@@ -29,3 +29,8 @@
     flex: 1
 }
 
+.common-container {
+    display: flex;
+    flex-direction: column;
+}
+
