@@ -8,6 +8,8 @@ import Web3 from 'web3';
 import { get } from 'lodash';
 import {AuctionSalt, AuctionSuffix} from "@1inch/fusion-sdk";
 
+import './main.css';
+
 export const ethereumMainContracts = {
     limitOrder: '0x1111111254eeb25477b68fb85ed929f73a960582',
     loSeriesNonceManager: '0x303389f541ff2d620e42832f180a08e767b28e1',
