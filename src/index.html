@@ -11,9 +11,30 @@
 <body>
 <main class="common-container">
     <h1>Limit Order</h1>
+
+    <div class="create-order-container">
+        <div>
+            <label for="maker-token">maker asset: <input id="maker-token" value="0xcd4060fa7b5164281f150fa290181401524ef76f"></label>
+        </div>
+        <div>
+            <label for="maker-amount">maker amount: <input type="number" id="maker-amount"  value="1000000000000000000"></label>
+        </div>
+        <div>
+            <label for="taker-token">taker asset: <input id="taker-token" value="0xcd4060fa7b5164281f150fa290181401524ef76f"></label>
+        </div>
+        <div>
+            <label for="taker-amount">taker asset: <input type="number" id="taker-amount" value="1000000000000000000"></label>
+        </div>
+        <button type="button" id="create-order">Create order</button>
+    </div>
+
     <div class="grid-container">
         <div class="grid-column">
             <textarea id="order"></textarea>
+            <label for="extension">extension: <input id="extension"></label>
+            <label for="signature">signature: <input id="signature"></label>
+            <button id="signOrder">Sign</button>
+            <button id="fillOrder">Fill order</button>
             <button id="parseOrderBtn">Parse</button>
         </div>
         <div class="grid-column">
@@ -25,7 +46,6 @@
                 <div class="predicate">
                     <label class="predicate" for="predicate">predicate: <input id="predicate"></label>
                 </div>
-                <div><label for="simulate-result">simulate result: <input id="simulate-result" ></label></div>
                 <div>
                     <label for="check-predicate">predicate valid: <input id="check-predicate"></label>
                 </div>
