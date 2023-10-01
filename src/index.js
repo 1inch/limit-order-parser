@@ -9,6 +9,7 @@ import {
     LimitOrderProtocolV3Facade,
     PROTOCOL_NAME,
     PROTOCOL_VERSION,
+    ORDER_STRUCTURE,
 } from '@1inch/limit-order-protocol-utils'
 import Web3 from 'web3';
 import { get } from 'lodash';
@@ -199,7 +200,6 @@ async function getLimitOrderBuilder() {
     const { networkId, contractAddress } = await getContractData();
 
     const builder = new LimitOrderBuilder(
-        contractAddress,
         createProviderConnector(),
         {
             domainName: PROTOCOL_NAME,
