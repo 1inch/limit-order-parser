@@ -14,10 +14,10 @@
     web3 "^1.8.1"
     ws "^8.12.1"
 
-"@1inch/limit-order-protocol-utils@4.0.13-alpha":
-  version "4.0.13-alpha"
-  resolved "https://registry.npmjs.org/@1inch/limit-order-protocol-utils/-/limit-order-protocol-utils-4.0.13-alpha.tgz#fadd942ed92e0ef4145321657a9fa9bf0dcb4e94"
-  integrity sha512-nBfR0e8INQOW+IABpsdd1pHwSy7QMS1w78y+Oo4TgzfGDpJHrAa+uUC9wlsc6ekBgbNo4PJ31wasmntdqyAd4w==
+"@1inch/limit-order-protocol-utils@4.0.18-alpha":
+  version "4.0.18-alpha"
+  resolved "https://registry.npmjs.org/@1inch/limit-order-protocol-utils/-/limit-order-protocol-utils-4.0.18-alpha.tgz#aea9c587af45bb2e2d1b5b46021d611059d5513a"
+  integrity sha512-ECnEIDaTdaZviyw+7Q2MrFmEUCJGhXW9IU3hNuaqk3M+WyZgvJ4FkhELYD0RlvAtL2xm+blWlEl4QpUzmuFFkw==
   dependencies:
     "@1inch/solidity-utils" "2.2.27"
     "@chainlink/contracts" "0.6.1"
@@ -9739,6 +9739,11 @@ react-dom@latest:
   dependencies:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
+
+react-hook-form@^7.46.2:
+  version "7.46.2"
+  resolved "https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.46.2.tgz#051e3cb2a73f3e86de739f2198c6042902158c43"
+  integrity sha512-x1DWmHQchV7x2Rq9l99M/cQHC8JGchAnw9Z0uTz5KrPa0bTl/Inm1NR7ceOARfIrkNuQNAhuSuZPYa6k7QYn3Q==
 
 react-is@^16.13.1:
   version "16.13.1"

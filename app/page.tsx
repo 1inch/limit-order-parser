@@ -1,113 +1,344 @@
-import Image from 'next/image'
+'use client'
+import {Controller, FieldValues, useForm} from "react-hook-form";
+import {
+    EIP712TypedData, LimitOrder,
+    LimitOrderBuilder, LimitOrderDecoder,
+    LimitOrderProtocolFacade, ParsedMakerTraits,
+    PROTOCOL_NAME,
+    PROTOCOL_VERSION, ProviderConnector, Web3ProviderConnector
+} from "@1inch/limit-order-protocol-utils";
+import Web3 from "web3";
+import React from "react";
+import {omit} from "next/dist/shared/lib/router/utils/omit";
+
+type FormattedMakerTraits = Omit<ParsedMakerTraits, 'nonce' | 'series'> & { nonce: number, series: number };
+
+const addressMap = new Map([
+    // [1, ethereumMainContracts],
+    // [56, binanceMainContracts],
+    [137, '0xe2942bf5973ce8746a6dae222e11b5a56bc84202']
+])
+
+let web3: Web3 | null = null;
+let facade: LimitOrderProtocolFacade | null = null;
+
+const orderMock = {
+    "salt": "24772380956908715502473767112441541420167429817584581067853599066994352650684",
+    "maker": "0xcd4060fa7b5164281f150fa290181401524ef76f",
+    "receiver": "0x0000000000000000000000000000000000000000",
+    "makerAsset": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
+    "takerAsset": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
+    "makingAmount": "2000000",
+    "takingAmount": "2000000000000000000",
+    "makerTraits": "0x40000000000000000000000000000000000065231de700000000000000000000",
+    "extension": "0x"
+}
+
+async function  connectWeb3() {
+    if (web3) {
+        return;
+    }
+
+    if (typeof (window as any).ethereum !== 'undefined') {
+        web3 = new Web3((window as any).ethereum);
+        try {
+            await (window as any).ethereum.enable();
+        } catch (error) {
+            console.error('User denied account access', error);
+        }
+    } else {
+        console.error('Please install MetaMask');
+    }
+}
+
+async function getContractData() {
+    await connectWeb3();
+    const networkId = await web3?.eth.net.getId()!;
+    const contractAddress = addressMap.get(networkId ?? 1)!;
+
+    return {
+        networkId,
+        contractAddress
+    }
+}
+
+function createProviderConnector(): ProviderConnector {
+    const ethereum = (window as any).ethereum;
+    return {
+        signTypedData(
+            walletAddress: string,
+            typedData: EIP712TypedData,
+            dataHash: string,
+        ) {
+            return ethereum.request({
+                "method": "eth_signTypedData_v4",
+                "params": [
+                    walletAddress,
+                    typedData
+                ]
+            })
+        }
+    } as ProviderConnector;
+}
+
+function getLimitOrderBuilder() {
+  const builder = new LimitOrderBuilder(
+    createProviderConnector(),
+    {
+      domainName: PROTOCOL_NAME,
+      version: PROTOCOL_VERSION,
+    }
+  );
+  return builder;
+}
+
+function getProvideConnector() {
+    return new Web3ProviderConnector(web3 as any)
+}
+
+async function getLimitOrderFacade() {
+    const { networkId, contractAddress } = await getContractData();
+    const connector = getProvideConnector();
+    return  new LimitOrderProtocolFacade(
+        contractAddress!, networkId, connector
+    );
+}
+
+type ParsedOrder = Pick<LimitOrder, 'makerAsset' | 'takerAsset' | 'makingAmount' | 'takingAmount'> & {
+    parsedMakerTraits: FormattedMakerTraits;
+    orderHash: string;
+    extension: string;
+    parsedExtension: {}
+}
 
 export default function Home() {
+  const orderForm = useForm<{ order: string }>();
+  const parsedOrderForm = useForm<ParsedOrder>();
+
+  async function parseOrder(data: FieldValues) {
+      let order: LimitOrder & { extension: string } | null = null;
+      try {
+          order = JSON.parse(data.order);
+      } catch (e) {
+          alert(`Can't parse order`);
+      }
+
+      if (!order) {
+          return;
+      }
+
+      const parsedMakerTraits = LimitOrderDecoder.unpackMakerTraits(order.makerTraits);
+      const formattedMakerTraits = {
+          ...omit(parsedMakerTraits as any, ['nonce', 'series']),
+          nonce: Number(parsedMakerTraits.nonce),
+          series: Number(parsedMakerTraits.series),
+      } as FormattedMakerTraits;
+      console.log('parsedMakerTraits: ', parsedMakerTraits);
+
+      const facade = await getLimitOrderFacade();
+
+      const orderHash = await facade.orderHash(order);
+
+      // const parsedExtension = LimitOrderDecoder.unpackExtension(order.extension);
+
+      const { reset } = parsedOrderForm;
+      reset({
+          ...order,
+          orderHash,
+          parsedMakerTraits: formattedMakerTraits,
+          extension: order.extension,
+          // parsedExtension,
+      });
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="flex flex-col">
+        <form className="grid grid-cols-1 gap-1 p-10" onSubmit={orderForm.handleSubmit((data) => parseOrder(data))}>
+            <div className="flex flex-col gap-10">
+            <textarea className="order-field"
+                      defaultValue={JSON.stringify(orderMock)}
+                      {...orderForm.register('order')}
+                      placeholder="Put order structure here"
+            ></textarea>
+                <button type="submit">Parse</button>
+            </div>
+        </form>
+
+        <div className="grid grid-cols-1 gap-1 p-10">
+            <div className="w-full flex">
+                <label htmlFor="makerAsset">makerAsset: </label>
+                <input id="makerAsset"
+                       className="flex-1"
+                       {...parsedOrderForm.register('makerAsset')}></input>
+            </div>
+            <div className="field-container w-full flex">
+                <label htmlFor="takerAsset">takerAsset: </label>
+                <input className="flex-1"
+                       id="takerAsset"
+                       {...parsedOrderForm.register('takerAsset')}></input>
+            </div>
+            <div className="field-container w-full flex">
+                <label htmlFor="orderHash">orderHash: </label>
+                <input className="flex-1"
+                       id="orderHash"
+                       {...parsedOrderForm.register('orderHash')}></input>
+            </div>
+
+            <div className="border p-1">
+                <h5>Maker traits:</h5>
+                <div className="field-container w-full flex">
+                    <label htmlFor="parsedMakerTraits.allowedSender">Allowed sender: </label>
+                    <Controller
+                        name="parsedMakerTraits.allowedSender"
+                        control={parsedOrderForm.control}
+                        defaultValue=""
+                        render={({ field }) => (
+                            <input id="parsedMakerTraits.allowedSender"
+                                   className="flex-1"
+                                   {...field} placeholder="Allowed sender" />
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.shouldCheckEpoch">Should check epoch</label>
+                    <Controller
+                        name="parsedMakerTraits.shouldCheckEpoch"
+                        control={parsedOrderForm.control}
+                        defaultValue={false}
+                        render={({ field }) => (
+                            <input type="checkbox"
+                                   checked={field.value}
+                                   id="parsedMakerTraits.shouldCheckEpoch" value="false"></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.allowPartialFill">Allow partial fill</label>
+                    <Controller
+                        name="parsedMakerTraits.allowPartialFill"
+                        control={parsedOrderForm.control}
+                        defaultValue={false}
+                        render={({ field }) => (
+                            <input type="checkbox"
+                                   checked={field.value}
+                                   id="parsedMakerTraits.allowPartialFill" value="false"></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.allowPriceImprovement">Allow price improvement</label>
+                    <Controller
+                        name="parsedMakerTraits.allowPriceImprovement"
+                        control={parsedOrderForm.control}
+                        defaultValue={false}
+                        render={({ field }) => (
+                            <input type="checkbox"
+                                   checked={field.value}
+                                   id="parsedMakerTraits.allowPriceImprovement" value="false"></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.allowMultipleFills">Allow multiple fields</label>
+                    <Controller
+                        name="parsedMakerTraits.allowMultipleFills"
+                        control={parsedOrderForm.control}
+                        defaultValue={false}
+                        render={({ field }) => (
+                            <input type="checkbox"
+                                   checked={field.value}
+                                   id="parsedMakerTraits.allowMultipleFills" value="false"></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.usePermit2">Permit 2</label>
+                    <Controller
+                        name="parsedMakerTraits.usePermit2"
+                        control={parsedOrderForm.control}
+                        defaultValue={false}
+                        render={({ field }) => (
+                            <input type="checkbox"
+                                   checked={field.value}
+                                   id="parsedMakerTraits.usePermit2" value="false"></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.unwrapWeth">Unwrap WETH</label>
+                    <Controller
+                        name="parsedMakerTraits.unwrapWeth"
+                        control={parsedOrderForm.control}
+                        defaultValue={false}
+                        render={({ field }) => (
+                            <input type="checkbox"
+                                   checked={field.value}
+                                   id="parsedMakerTraits.unwrapWeth" value="false"></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.expiry">Expiry</label>
+                    <Controller
+                        name="parsedMakerTraits.expiry"
+                        control={parsedOrderForm.control}
+                        render={({ field }) => (
+                            <input id="parsedMakerTraits.expiry" {...field}></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.nonce">Nonce</label>
+                    <Controller
+                        name="parsedMakerTraits.nonce"
+                        control={parsedOrderForm.control}
+                        render={({ field }) => (
+                            <input id="parsedMakerTraits.nonce" {...field}></input>
+                        )}
+                    />
+                </div>
+
+                <div className="field-container">
+                    <label htmlFor="parsedMakerTraits.series">Series</label>
+                    <Controller
+                        name="parsedMakerTraits.series"
+                        control={parsedOrderForm.control}
+                        render={({ field }) => (
+                            <input id="parsedMakerTraits.series" {...field}></input>
+                        )}
+                    />
+                </div>
+            </div>
+
+            <div className="border p-1">
+                <div className="field-container">
+                    <label htmlFor="takerAsset">Extension: </label>
+                    <input className="flex-1"
+                           id="extension"
+                           {...parsedOrderForm.register('extension')}></input>
+                </div>
+
+                {/*<div className="field-container">*/}
+                {/*    <label htmlFor="parsedExtension.customData">customData</label>*/}
+                {/*    <Controller*/}
+                {/*        name="parsedExtension.customData"*/}
+                {/*        control={parsedOrderForm.control}*/}
+                {/*        render={({ field }) => (*/}
+                {/*            <input id="parsedExtension.customData" {...field}></input>*/}
+                {/*        )}*/}
+                {/*    />*/}
+                {/*</div>*/}
+            </div>
         </div>
-      </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
   )
 }
