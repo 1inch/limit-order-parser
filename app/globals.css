@@ -26,6 +26,15 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+nav ul {
+  list-style: none;
+  display: flex;
+}
+
+nav ul li {
+  margin-left: 10px;
+}
+
 textarea, input {
   border: 1px solid #000;
 }
