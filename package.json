@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cp:static": "cp -r /out/next/* _site/",
+    "host-github-pages": "bundle exec jekyll s --source out --destination _site --config _config.yml"
   },
   "devDependencies": {
     "@1inch/fusion-sdk": "^0.1.8",
