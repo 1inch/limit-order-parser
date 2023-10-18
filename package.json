@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@1inch/fusion-sdk": "^0.1.8",
-    "@1inch/limit-order-protocol-utils": "4.0.18-alpha",
+    "@1inch/limit-order-protocol-utils": "4.0.21-alpha",
     "@babel/core": "^7.22.11",
     "@babel/preset-env": "^7.22.14",
     "@types/node": "latest",

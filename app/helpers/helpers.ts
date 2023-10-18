@@ -12,7 +12,7 @@ export type FormattedMakerTraits = Omit<ParsedMakerTraits, 'nonce' | 'series'> &
 const addressMap = new Map([
     // [1, ethereumMainContracts],
     // [56, binanceMainContracts],
-    [137, '0xe2942bf5973ce8746a6dae222e11b5a56bc84202']
+    [137, '0xdc49a6e76f017175ba46e5038a4df6606d961ff3']
 ])
 
 let web3: Web3 | null = null;
@@ -34,14 +34,16 @@ export async function  connectWeb3() {
     }
 }
 
-export async function getContractData() {
+export async function getWeb3Data() {
     await connectWeb3();
     const networkId = await web3?.eth.net.getId()!;
     const contractAddress = addressMap.get(networkId ?? 1)!;
+    const currentAddress = await web3?.eth.getAccounts();
 
     return {
         networkId,
-        contractAddress
+        contractAddress,
+        maker: currentAddress?.[0],
     }
 }
 
@@ -80,7 +82,11 @@ export function getProvideConnector() {
 }
 
 export async function getLimitOrderFacade() {
-    const { networkId, contractAddress } = await getContractData();
+    if (facade) {
+        return facade;
+    }
+
+    const { networkId, contractAddress } = await getWeb3Data();
     const connector = getProvideConnector();
     return  new LimitOrderProtocolFacade(
         contractAddress!, networkId, connector
