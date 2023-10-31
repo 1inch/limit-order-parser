@@ -25,9 +25,12 @@
     "eslint-config-next": "latest",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.3",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.0.2",
     "mini-css-extract-plugin": "^2.7.6",
     "parcel-bundler": "^1.12.5",
     "postcss": "latest",
+    "prettier": "^3.0.3",
     "style-loader": "^3.3.3",
     "tailwindcss": "latest",
     "typescript": "latest",
@@ -47,5 +50,9 @@
     "web3": "^1.9.0",
     "webpack-dev-server": "^4.15.1",
     "yarn": "^1.22.19"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": "eslint --fix",
+    "{**/*,*}.{ts,tsx,html,css}": "prettier --write"
   }
 }
