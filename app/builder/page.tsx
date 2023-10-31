@@ -1,11 +1,20 @@
 "use client"
 import React from "react";
-import {Controller, FieldValues, useForm} from "react-hook-form";
-import {LimitOrder, ZERO_ADDRESS} from "@1inch/limit-order-protocol-utils";
+import {useForm} from "react-hook-form";
+import {LimitOrder, LimitOrderBuilder, ZERO_ADDRESS} from "@1inch/limit-order-protocol-utils";
 import {getLimitOrderBuilder, getWeb3Data} from "@/app/helpers/helpers";
+import {omit} from "next/dist/shared/lib/router/utils/omit";
+
+type CreateMakerTraits = NonNullable<Parameters<typeof LimitOrderBuilder.buildMakerTraits>[0]>;
+
+type CreateMakerTraitsForm = Omit<CreateMakerTraits, 'series' | 'nonce'> & {
+    nonce?: number;
+    series?: number;
+}
 
 type CreateOrderForm = Omit<LimitOrder, 'makerTraits' | 'salt' | 'maker'> & {
-    salt?: Pick<LimitOrder, 'salt'>['salt'],
+    salt?: LimitOrder['salt'],
+    makerTraits: CreateMakerTraitsForm,
 }
 
 type CreatedOrderForm = LimitOrder & {
@@ -20,6 +29,11 @@ const DEFAULT_FORM_VALUE: CreateOrderForm = {
     makingAmount: '2000000',
     takingAmount: '2000000000000000000',
     receiver: ZERO_ADDRESS,
+    makerTraits: {
+        allowPartialFill: true,
+        allowMultipleFills: true,
+        allowPriceImprovement: true,
+    },
 }
 
 export default function Builder() {
@@ -37,8 +51,20 @@ export default function Builder() {
             return;
         }
 
+        const orderData = omit(fields, ['makerTraits']);
+
+        const { nonce, series } = fields.makerTraits;
+        const makerTraits = LimitOrderBuilder.buildMakerTraits({
+            ...omit(fields.makerTraits, ['nonce', 'series']),
+            nonce: nonce ? BigInt(nonce) : undefined,
+            series: series ? BigInt(series) : undefined,
+        });
+
+        debugger
+
         const order = builder.buildLimitOrder({
-            ...fields,
+            ...orderData,
+            makerTraits,
             maker,
         });
 
@@ -67,12 +93,6 @@ export default function Builder() {
                                {...orderForm.register('makerAsset')}></input>
                     </div>
                     <div className="field-container w-full flex">
-                        <label htmlFor="makerAsset">makerAsset: </label>
-                        <input id="makerAsset"
-                               className="flex-1"
-                               {...orderForm.register('takerAsset')}></input>
-                    </div>
-                    <div className="field-container w-full flex">
                         <label htmlFor="takerAsset">takerAsset: </label>
                         <input id="takerAsset"
                                className="flex-1"
@@ -98,7 +118,70 @@ export default function Builder() {
                     </div>
                 </div>
 
-                <button>Create and subscribe</button>
+                <div className="border p-1">
+                    <h5>Maker traits:</h5>
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.shouldCheckEpoch">Should check epoch</label>
+                        <input type="checkbox"
+                               {...orderForm.register('makerTraits.shouldCheckEpoch')}
+                               id="makerTraits.shouldCheckEpoch"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.allowPartialFill">Allow partial fill</label>
+                        <input type="checkbox"
+                               {...orderForm.register('makerTraits.allowPartialFill')}
+                               id="makerTraits.allowPartialFill"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.allowPriceImprovement">Allow price improvement</label>
+                        <input type="checkbox"
+                               {...orderForm.register('makerTraits.allowPriceImprovement')}
+                               id="makerTraits.allowPriceImprovement"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.allowMultipleFills">Allow multiple fields</label>
+                        <input type="checkbox"
+                               {...orderForm.register('makerTraits.allowMultipleFills')}
+                               id="makerTraits.allowMultipleFills"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.usePermit2">Permit 2</label>
+                      <input type="checkbox"
+                             {...orderForm.register('makerTraits.usePermit2')}
+                             id="makerTraits.usePermit2"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.unwrapWeth">Unwrap WETH</label>
+                      <input type="checkbox"
+                             {...orderForm.register('makerTraits.unwrapWeth')}
+                             id="makerTraits.unwrapWeth"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.expiry">Expiry</label>
+                        <input {...orderForm.register('makerTraits.expiry')}
+                               id="makerTraits.expiry"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.nonce">Nonce</label>
+                        <input {...orderForm.register('makerTraits.nonce')}
+                               id="makerTraits.nonce"></input>
+                    </div>
+
+                    <div className="field-container">
+                        <label htmlFor="makerTraits.series">Series</label>
+                        <input {...orderForm.register('makerTraits.series')}
+                               id="makerTraits.series"></input>
+                    </div>
+                </div>
+
+                <button type="submit">Create and subscribe</button>
             </form>
 
             <form>

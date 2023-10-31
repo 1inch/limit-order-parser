@@ -44,7 +44,6 @@ export default function Parser() {
             nonce: Number(parsedMakerTraits.nonce),
             series: Number(parsedMakerTraits.series),
         } as FormattedMakerTraits;
-        console.log('parsedMakerTraits: ', parsedMakerTraits);
 
         const facade = await getLimitOrderFacade();
 
@@ -80,18 +79,21 @@ export default function Parser() {
                     <label htmlFor="makerAsset">makerAsset: </label>
                     <input id="makerAsset"
                            className="flex-1"
+                           readOnly
                            {...parsedOrderForm.register('makerAsset')}></input>
                 </div>
                 <div className="field-container w-full flex">
                     <label htmlFor="takerAsset">takerAsset: </label>
                     <input className="flex-1"
                            id="takerAsset"
+                           readOnly
                            {...parsedOrderForm.register('takerAsset')}></input>
                 </div>
                 <div className="field-container w-full flex">
                     <label htmlFor="orderHash">orderHash: </label>
                     <input className="flex-1"
                            id="orderHash"
+                           readOnly
                            {...parsedOrderForm.register('orderHash')}></input>
                 </div>
 
@@ -102,10 +104,10 @@ export default function Parser() {
                         <Controller
                             name="parsedMakerTraits.allowedSender"
                             control={parsedOrderForm.control}
-                            defaultValue=""
                             render={({ field }) => (
                                 <input id="parsedMakerTraits.allowedSender"
                                        className="flex-1"
+                                       readOnly
                                        {...field} placeholder="Allowed sender" />
                             )}
                         />
@@ -116,10 +118,10 @@ export default function Parser() {
                         <Controller
                             name="parsedMakerTraits.shouldCheckEpoch"
                             control={parsedOrderForm.control}
-                            defaultValue={false}
                             render={({ field }) => (
                                 <input type="checkbox"
                                        checked={field.value}
+                                       readOnly
                                        id="parsedMakerTraits.shouldCheckEpoch" value="false"></input>
                             )}
                         />
@@ -130,10 +132,10 @@ export default function Parser() {
                         <Controller
                             name="parsedMakerTraits.allowPartialFill"
                             control={parsedOrderForm.control}
-                            defaultValue={false}
                             render={({ field }) => (
                                 <input type="checkbox"
                                        checked={field.value}
+                                       readOnly
                                        id="parsedMakerTraits.allowPartialFill" value="false"></input>
                             )}
                         />
@@ -144,10 +146,10 @@ export default function Parser() {
                         <Controller
                             name="parsedMakerTraits.allowPriceImprovement"
                             control={parsedOrderForm.control}
-                            defaultValue={false}
                             render={({ field }) => (
                                 <input type="checkbox"
                                        checked={field.value}
+                                       readOnly
                                        id="parsedMakerTraits.allowPriceImprovement" value="false"></input>
                             )}
                         />
@@ -158,10 +160,10 @@ export default function Parser() {
                         <Controller
                             name="parsedMakerTraits.allowMultipleFills"
                             control={parsedOrderForm.control}
-                            defaultValue={false}
                             render={({ field }) => (
                                 <input type="checkbox"
                                        checked={field.value}
+                                       readOnly
                                        id="parsedMakerTraits.allowMultipleFills" value="false"></input>
                             )}
                         />
@@ -172,10 +174,10 @@ export default function Parser() {
                         <Controller
                             name="parsedMakerTraits.usePermit2"
                             control={parsedOrderForm.control}
-                            defaultValue={false}
                             render={({ field }) => (
                                 <input type="checkbox"
                                        checked={field.value}
+                                       readOnly
                                        id="parsedMakerTraits.usePermit2" value="false"></input>
                             )}
                         />
@@ -186,10 +188,10 @@ export default function Parser() {
                         <Controller
                             name="parsedMakerTraits.unwrapWeth"
                             control={parsedOrderForm.control}
-                            defaultValue={false}
                             render={({ field }) => (
                                 <input type="checkbox"
                                        checked={field.value}
+                                       readOnly
                                        id="parsedMakerTraits.unwrapWeth" value="false"></input>
                             )}
                         />
@@ -201,7 +203,7 @@ export default function Parser() {
                             name="parsedMakerTraits.expiry"
                             control={parsedOrderForm.control}
                             render={({ field }) => (
-                                <input id="parsedMakerTraits.expiry" {...field}></input>
+                                <input id="parsedMakerTraits.expiry" {...field} readOnly></input>
                             )}
                         />
                     </div>
@@ -212,7 +214,7 @@ export default function Parser() {
                             name="parsedMakerTraits.nonce"
                             control={parsedOrderForm.control}
                             render={({ field }) => (
-                                <input id="parsedMakerTraits.nonce" {...field}></input>
+                                <input id="parsedMakerTraits.nonce" {...field} readOnly></input>
                             )}
                         />
                     </div>
@@ -223,7 +225,7 @@ export default function Parser() {
                             name="parsedMakerTraits.series"
                             control={parsedOrderForm.control}
                             render={({ field }) => (
-                                <input id="parsedMakerTraits.series" {...field}></input>
+                                <input id="parsedMakerTraits.series" {...field} readOnly></input>
                             )}
                         />
                     </div>
@@ -234,6 +236,7 @@ export default function Parser() {
                         <label htmlFor="takerAsset">Extension: </label>
                         <input className="flex-1"
                                id="extension"
+                               readOnly
                                {...parsedOrderForm.register('extension')}></input>
                     </div>
                 </div>
