@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write .",
     "host-github-pages": "bundle exec jekyll s --source out --destination _site --config _config.yml"
   },
   "devDependencies": {
