@@ -51,9 +51,7 @@
     "webpack-dev-server": "^4.15.1",
     "yarn": "^1.22.19"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "prettier --write . && git add -A ."
-    }
-  }
+  "pre-commit": [
+    "lint-staged"
+  ]
 }
