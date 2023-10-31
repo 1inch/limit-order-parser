@@ -1,7 +1,7 @@
 "use client"
 import React from "react";
 import {useForm} from "react-hook-form";
-import {LimitOrder, LimitOrderBuilder, ZERO_ADDRESS} from "@1inch/limit-order-protocol-utils";
+import {LimitOrder, LimitOrderBuilder, ZERO_ADDRESS, ZX} from "@1inch/limit-order-protocol-utils";
 import {getLimitOrderBuilder, getWeb3Data} from "@/app/helpers/helpers";
 import {omit} from "next/dist/shared/lib/router/utils/omit";
 
@@ -12,9 +12,12 @@ type CreateMakerTraitsForm = Omit<CreateMakerTraits, 'series' | 'nonce'> & {
     series?: number;
 }
 
+type ExtensionParams = NonNullable<Parameters<LimitOrderBuilder['buildLimitOrder']>[1]>;
+
 type CreateOrderForm = Omit<LimitOrder, 'makerTraits' | 'salt' | 'maker'> & {
     salt?: LimitOrder['salt'],
     makerTraits: CreateMakerTraitsForm,
+    extension: ExtensionParams;
 }
 
 type CreatedOrderForm = LimitOrder & {
@@ -34,6 +37,11 @@ const DEFAULT_FORM_VALUE: CreateOrderForm = {
         allowMultipleFills: true,
         allowPriceImprovement: true,
     },
+    extension: {
+        permit: ZX,
+        predicate: ZX,
+        postInteraction: ZX,
+    }
 }
 
 export default function Builder() {
@@ -41,7 +49,7 @@ export default function Builder() {
         defaultValues: DEFAULT_FORM_VALUE,
     });
 
-    const createdOrderForm = useForm<CreatedOrderForm>()
+    const createdOrderForm = useForm<CreatedOrderForm>();
 
     async function createOrder(fields: CreateOrderForm): Promise<void> {
         const builder = getLimitOrderBuilder();
@@ -180,6 +188,30 @@ export default function Builder() {
                                id="makerTraits.series"></input>
                     </div>
                 </div>
+
+              <div className="border p-1">
+                <h5>Extension:</h5>
+                <div className="field-container">
+                  <label htmlFor="extension.permit">Permit: </label>
+                  <input type="text"
+                         {...orderForm.register('extension.permit')}
+                         id="makerTraits.permit"></input>
+                </div>
+
+                <div className="field-container">
+                  <label htmlFor="extension.predicate">Predicate:</label>
+                  <input type="text"
+                         {...orderForm.register('extension.predicate')}
+                         id="makerTraits.predicate"></input>
+                </div>
+
+                <div className="field-container">
+                  <label htmlFor="extension.postInteraction">Post interaction:</label>
+                  <input type="text"
+                         {...orderForm.register('extension.postInteraction')}
+                         id="makerTraits.predicate"></input>
+                </div>
+              </div>
 
                 <button type="submit">Create and subscribe</button>
             </form>
