@@ -51,8 +51,9 @@
     "webpack-dev-server": "^4.15.1",
     "yarn": "^1.22.19"
   },
-  "lint-staged": {
-    "*.{js,ts,jsx,tsx}": "eslint --fix",
-    "{**/*,*}.{ts,tsx,html,css}": "prettier --write"
+  "husky": {
+    "hooks": {
+      "pre-commit": "prettier --write . && git add -A ."
+    }
   }
 }
