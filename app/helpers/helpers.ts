@@ -10,8 +10,7 @@ import {
 export type FormattedMakerTraits = Omit<ParsedMakerTraits, 'nonce' | 'series'> & { nonce: number, series: number };
 
 const addressMap = new Map([
-    // [1, ethereumMainContracts],
-    // [56, binanceMainContracts],
+    [1, '0xc6f9b19e2e91a8cd3b7ff62aa68e4de8f7cdddbc'],
     [137, '0xdc49a6e76f017175ba46e5038a4df6606d961ff3']
 ])
 

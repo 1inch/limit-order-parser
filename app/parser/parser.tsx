@@ -1,7 +1,20 @@
 import {Controller, FieldValues, useForm} from "react-hook-form";
-import {LimitOrder, LimitOrderDecoder} from "@1inch/limit-order-protocol-utils";
+import { LimitOrder, LimitOrderBuilder, LimitOrderDecoder, ZX } from "@1inch/limit-order-protocol-utils";
 import {FormattedMakerTraits, getLimitOrderFacade} from "@/app/helpers/helpers";
 import {omit} from "next/dist/shared/lib/router/utils/omit";
+import React from "react";
+
+const ethereumOrderMockWithPredicate = {
+  "salt": "189791213515228772493723881274800954614876732216",
+  "maker": "0xcd4060fa7b5164281f150fa290181401524ef76f",
+  "receiver": "0x0000000000000000000000000000000000000000",
+  "makerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "takerAsset": "0x6b175474e89094c44da98b954eedeac495271d0f",
+  "makingAmount": "3000000",
+  "takingAmount": "3000000000000000000",
+  "makerTraits": "0x420000000000000000000000000000000000654d4ee100000000000000000000",
+  "extension": "0x000000f4000000f4000000f40000000000000000000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000cd4060fa7b5164281f150fa290181401524ef76f000000000000000000000000c6f9b19e2e91a8cd3b7ff62aa68e4de8f7cdddbcffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000654d4edb000000000000000000000000000000000000000000000000000000000000001bc772358d7d01f6823a0ace7d5b90dedd996c738c92368d49fe01744d68506807108479337967b5b549891e174ffece7b2414c041962d27b8b441600aaed51782"
+}
 
 const orderMock = {
     "salt": "24772380956908715502473767112441541420167429817584581067853599066994352650684",
@@ -13,13 +26,28 @@ const orderMock = {
     "takingAmount": "2000000000000000000",
     "makerTraits": "0x40000000000000000000000000000000000065231de700000000000000000000",
     "extension": "0x"
-}
+};
+
+type CreateExtensionParams = NonNullable<Parameters<LimitOrderBuilder['buildLimitOrder']>[1]>;
+type ExtensionParams = Required<CreateExtensionParams>;
 
 type ParsedOrder = Pick<LimitOrder, 'makerAsset' | 'takerAsset' | 'makingAmount' | 'takingAmount'> & {
     parsedMakerTraits: FormattedMakerTraits;
     orderHash: string;
     extension: string;
-    parsedExtension: {}
+    parsedExtension: ExtensionParams;
+}
+
+const defaultExtension: ExtensionParams = {
+  makingAmountGetter: ZX,
+  takingAmountGetter: ZX,
+  permit: ZX,
+  customData: ZX,
+  predicate: ZX,
+  postInteraction: ZX,
+  preInteraction: ZX,
+  makerAssetSuffix: ZX,
+  takerAssetSuffix: ZX
 }
 
 export default function Parser() {
@@ -49,7 +77,15 @@ export default function Parser() {
 
         const orderHash = await facade.orderHash(order);
 
-        // const parsedExtension = LimitOrderDecoder.unpackExtension(order.extension);
+        const parsedExtension = order.extension !== ZX
+          ? LimitOrderDecoder.unpackExtension(order.extension)
+          : { customData: ZX, interactions: {...defaultExtension} };
+
+        const extensionData: ExtensionParams =  {
+          ...defaultExtension,
+          ...parsedExtension.interactions,
+          customData: parsedExtension.customData,
+        };
 
         const { reset } = parsedOrderForm;
         reset({
@@ -57,7 +93,7 @@ export default function Parser() {
             orderHash,
             parsedMakerTraits: formattedMakerTraits,
             extension: order.extension,
-            // parsedExtension,
+            parsedExtension: extensionData,
         });
     }
 
@@ -66,7 +102,7 @@ export default function Parser() {
             <form className="grid grid-cols-1 gap-1 p-10" onSubmit={orderForm.handleSubmit((data) => parseOrder(data))}>
                 <div className="flex flex-col gap-10">
             <textarea className="order-field"
-                      defaultValue={JSON.stringify(orderMock)}
+                      defaultValue={JSON.stringify(ethereumOrderMockWithPredicate)}
                       {...orderForm.register('order')}
                       placeholder="Put order structure here"
             ></textarea>
@@ -99,7 +135,7 @@ export default function Parser() {
 
                 <div className="border p-1">
                     <h5>Maker traits:</h5>
-                    <div className="field-container w-full flex">
+                    <div className="field-container">
                         <label htmlFor="parsedMakerTraits.allowedSender">Allowed sender: </label>
                         <Controller
                             name="parsedMakerTraits.allowedSender"
@@ -232,13 +268,69 @@ export default function Parser() {
                 </div>
 
                 <div className="border p-1">
-                    <div className="field-container">
-                        <label htmlFor="takerAsset">Extension: </label>
-                        <input className="flex-1"
-                               id="extension"
-                               readOnly
-                               {...parsedOrderForm.register('extension')}></input>
-                    </div>
+                    <h5>Extension:</h5>
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.permit"> Permit:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.permit')}
+                                 id="makerTraits.permit"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.predicate"> predicate:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.predicate')}
+                                 id="makerTraits.predicate"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.makerAssetSuffix"> makerAssetSuffix:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.makerAssetSuffix')}
+                                 id="makerTraits.makerAssetSuffix"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.makerAssetSuffix"> takerAssetSuffix:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.takerAssetSuffix')}
+                                 id="makerTraits.takerAssetSuffix"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.postInteraction"> postInteraction:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.postInteraction')}
+                                 id="makerTraits.postInteraction"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.postInteraction"> preInteraction:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.preInteraction')}
+                                 id="makerTraits.preInteraction"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.makingAmountGetter"> makingAmountGetter:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.makingAmountGetter')}
+                                 id="makerTraits.makingAmountGetter"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.takingAmountGetter"> takingAmountGetter:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.takingAmountGetter')}
+                                 id="makerTraits.takingAmountGetter"></input>
+                        </div>
+
+                        <div className="field-container">
+                          <label htmlFor="parsedExtension.customData"> customData:</label>
+                          <input type="text"
+                                 {...parsedOrderForm.register('parsedExtension.customData')}
+                                 id="makerTraits.customData"></input>
+                        </div>
                 </div>
             </div>
         </>
