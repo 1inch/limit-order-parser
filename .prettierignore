@@ -1,0 +1,7 @@
+*.json
+*.yml
+Gemfile
+Gemfile.lock
+*.md
+*.lock
+
