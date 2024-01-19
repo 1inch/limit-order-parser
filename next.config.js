@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  basePath: '/limit-order-parser',
-  assetPrefix: '/limit-order-parser/',
+  output: 'export',
 }
 
 module.exports = nextConfig
