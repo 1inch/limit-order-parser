@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "ENV=production next build",
     "postbuild": "cp .nojekyll ./out/",
     "start": "next start",
     "lint": "next lint",
