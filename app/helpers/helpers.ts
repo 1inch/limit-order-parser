@@ -40,7 +40,7 @@ export async function getWeb3Data() {
     const currentAddress = await web3?.eth.getAccounts();
 
     return {
-        networkId: BigInt(networkId),
+        networkId,
         contractAddress,
         maker: currentAddress?.[0],
     }
@@ -88,7 +88,7 @@ export async function getLimitOrderFacade() {
     const { networkId, contractAddress } = await getWeb3Data();
     const connector = getProvideConnector();
     return  new LimitOrderProtocolFacade(
-        contractAddress!, Number(networkId), connector
+        contractAddress!, networkId, connector
     );
 }
 
