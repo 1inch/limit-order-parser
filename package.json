@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "cp .nojekyll ./out/_next",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
