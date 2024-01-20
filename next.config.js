@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
+
+const isProd = process.env.NODE_ENV === 'production'
+
 const nextConfig = {
   output: 'export',
-  basePath: '/limit-order-parser',
+  basePath: isProd ? '/limit-order-parser' : undefined,
 }
 
 module.exports = nextConfig
