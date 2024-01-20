@@ -23,7 +23,10 @@ jobs:
           yarn install --frozen-lockfile
           yarn build
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: out
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
+#      - name: Deploy 🚀
+#        uses: JamesIves/github-pages-deploy-action@v4
+#        with:
+#          folder: ./out
