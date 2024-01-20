@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "cp .nojekyll ./out/",
+    "postbuild": "cp .nojekyll ./out/ && yarn run deploy",
+    "deploy": "gh-pages -d out -t true",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
