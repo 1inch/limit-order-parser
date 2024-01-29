@@ -3,6 +3,7 @@ import { LimitOrder, LimitOrderBuilder, LimitOrderDecoder, ZX } from "@1inch/lim
 import {FormattedMakerTraits, getLimitOrderFacade} from "@/app/helpers/helpers";
 import {omit} from "next/dist/shared/lib/router/utils/omit";
 import React from "react";
+import StringField from "@/app/components/string-field";
 
 const ethereumOrderMockWithPredicate = {
   "salt": "189791213515228772493723881274800954614876732216",
@@ -111,28 +112,9 @@ export default function Parser() {
             </form>
 
             <div className="grid grid-cols-1 gap-1 p-10">
-                <div className="w-full flex">
-                    <label htmlFor="makerAsset">makerAsset: </label>
-                    <input id="makerAsset"
-                           className="flex-1"
-                           readOnly
-                           {...parsedOrderForm.register('makerAsset')}></input>
-                </div>
-                <div className="field-container w-full flex">
-                    <label htmlFor="takerAsset">takerAsset: </label>
-                    <input className="flex-1"
-                           id="takerAsset"
-                           readOnly
-                           {...parsedOrderForm.register('takerAsset')}></input>
-                </div>
-                <div className="field-container w-full flex">
-                    <label htmlFor="orderHash">orderHash: </label>
-                    <input className="flex-1"
-                           id="orderHash"
-                           readOnly
-                           {...parsedOrderForm.register('orderHash')}></input>
-                </div>
-
+                <StringField formInstance={parsedOrderForm} name='makerAsset' label='Maker asset'></StringField>
+                <StringField formInstance={parsedOrderForm} name='takerAsset' label='TakerAsset'></StringField>
+                <StringField formInstance={parsedOrderForm} name='orderHash' label='Order hash'></StringField>
                 <div className="border p-1">
                     <h5>Maker traits:</h5>
                     <div className="field-container">
