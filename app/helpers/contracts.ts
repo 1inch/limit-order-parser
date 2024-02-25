@@ -1,0 +1,28 @@
+export enum EthChainId {
+  ethereumMainnet = 1,
+  binanceMainnet = 56,
+  polygonMainnet = 137,
+  optimismMainnet = 10,
+  arbitrumMainnet = 42161,
+  gnosisMainnet = 100,
+  avalancheMainnet = 43114,
+  fantomMainnet = 250,
+  auroraMainnet = 1313161554,
+  klaytnMainnet = 8217,
+  zkSyncEraMainnet = 324,
+  baseMainnet = 8453,
+}
+export const contractAddresses: Map<EthChainId, string> = new Map([
+  [EthChainId.ethereumMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.binanceMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.polygonMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.optimismMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.arbitrumMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.gnosisMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.avalancheMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.fantomMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.auroraMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.klaytnMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.baseMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
+  [EthChainId.zkSyncEraMainnet, '0x6fd4383cb451173d5f9304f041c7bcbf27d561ff'],
+])
