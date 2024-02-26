@@ -4,6 +4,7 @@ import {FormattedMakerTraits, getLimitOrderFacade} from "@/app/helpers/helpers";
 import {omit} from "next/dist/shared/lib/router/utils/omit";
 import React from "react";
 import StringField from "@/app/components/string-field";
+import InchButton from "@/app/components/inch-button";
 
 const ethereumOrderMockWithPredicate = {
   "salt": "189791213515228772493723881274800954614876732216",
@@ -100,36 +101,27 @@ export default function Parser() {
 
     return (
         <>
-            <form className="grid grid-cols-1 gap-1 p-10" onSubmit={orderForm.handleSubmit((data) => parseOrder(data))}>
-                <div className="flex flex-col gap-10">
-            <textarea className="order-field"
-                      defaultValue={JSON.stringify(ethereumOrderMockWithPredicate)}
-                      {...orderForm.register('order')}
-                      placeholder="Put order structure here"
-            ></textarea>
-                    <button type="submit">Parse</button>
-                </div>
+            <form className="grid grid-cols-1 gap-1" onSubmit={orderForm.handleSubmit((data) => parseOrder(data))}>
+              <div className="flex flex-col gap-10">
+                <textarea className="bg-1inch-bg-1 p-4 rounded-2xl w-100%"
+                          style={{height: '370px'}}
+                          defaultValue={JSON.stringify(ethereumOrderMockWithPredicate)}
+                          {...orderForm.register('order')}
+                          placeholder="Put order structure here"
+                ></textarea>
+                <div className='flex justify-center flex-1'><InchButton className='w-1/2'>Parse</InchButton></div>
+              </div>
             </form>
 
             <div className="grid grid-cols-1 gap-1 p-10">
                 <StringField formInstance={parsedOrderForm} name='makerAsset' label='Maker asset'></StringField>
                 <StringField formInstance={parsedOrderForm} name='takerAsset' label='TakerAsset'></StringField>
                 <StringField formInstance={parsedOrderForm} name='orderHash' label='Order hash'></StringField>
-                <div className="border p-1">
+                <div className="border rounded-2xl p-4 mt-4 grid grid-cols-1 gap-4">
                     <h5>Maker traits:</h5>
-                    <div className="field-container">
-                        <label htmlFor="parsedMakerTraits.allowedSender">Allowed sender: </label>
-                        <Controller
-                            name="parsedMakerTraits.allowedSender"
-                            control={parsedOrderForm.control}
-                            render={({ field }) => (
-                                <input id="parsedMakerTraits.allowedSender"
-                                       className="flex-1"
-                                       readOnly
-                                       {...field} placeholder="Allowed sender" />
-                            )}
-                        />
-                    </div>
+
+                  <StringField formInstance={parsedOrderForm}
+                               name='parsedMakerTraits.allowedSender' label='Allowed sender'></StringField>
 
                     <div className="field-container">
                         <label htmlFor="parsedMakerTraits.shouldCheckEpoch">Should check epoch</label>
@@ -215,104 +207,48 @@ export default function Parser() {
                         />
                     </div>
 
-                    <div className="field-container">
-                        <label htmlFor="parsedMakerTraits.expiry">Expiry</label>
-                        <Controller
-                            name="parsedMakerTraits.expiry"
-                            control={parsedOrderForm.control}
-                            render={({ field }) => (
-                                <input id="parsedMakerTraits.expiry" {...field} readOnly></input>
-                            )}
-                        />
-                    </div>
+                  <StringField formInstance={parsedOrderForm}
+                               name='parsedMakerTraits.expiry' label='Expiry'></StringField>
 
-                    <div className="field-container">
-                        <label htmlFor="parsedMakerTraits.nonce">Nonce</label>
-                        <Controller
-                            name="parsedMakerTraits.nonce"
-                            control={parsedOrderForm.control}
-                            render={({ field }) => (
-                                <input id="parsedMakerTraits.nonce" {...field} readOnly></input>
-                            )}
-                        />
-                    </div>
+                  <StringField formInstance={parsedOrderForm}
+                               name='parsedMakerTraits.nonce' label='Nonce'></StringField>
 
-                    <div className="field-container">
-                        <label htmlFor="parsedMakerTraits.series">Series</label>
-                        <Controller
-                            name="parsedMakerTraits.series"
-                            control={parsedOrderForm.control}
-                            render={({ field }) => (
-                                <input id="parsedMakerTraits.series" {...field} readOnly></input>
-                            )}
-                        />
-                    </div>
+                  <StringField formInstance={parsedOrderForm}
+                               name='parsedMakerTraits.series' label='Series'></StringField>
                 </div>
 
-                <div className="border p-1">
+                <div className="rounded-2xl p-4 mt-4 border grid grid-cols-1 gap-4">
                     <h5>Extension:</h5>
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.permit"> Permit:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.permit')}
-                                 id="makerTraits.permit"></input>
-                        </div>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.predicate"> predicate:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.predicate')}
-                                 id="makerTraits.predicate"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.permit' label='Permit'></StringField>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.makerAssetSuffix"> makerAssetSuffix:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.makerAssetSuffix')}
-                                 id="makerTraits.makerAssetSuffix"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.predicate' label='predicate'></StringField>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.makerAssetSuffix"> takerAssetSuffix:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.takerAssetSuffix')}
-                                 id="makerTraits.takerAssetSuffix"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.makerAssetSuffix' label='makerAssetSuffix'></StringField>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.postInteraction"> postInteraction:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.postInteraction')}
-                                 id="makerTraits.postInteraction"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.takerAssetSuffix' label='takerAssetSuffix'></StringField>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.postInteraction"> preInteraction:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.preInteraction')}
-                                 id="makerTraits.preInteraction"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.takerAssetSuffix' label='takerAssetSuffix'></StringField>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.makingAmountGetter"> makingAmountGetter:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.makingAmountGetter')}
-                                 id="makerTraits.makingAmountGetter"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.postInteraction' label='postInteraction'></StringField>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.takingAmountGetter"> takingAmountGetter:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.takingAmountGetter')}
-                                 id="makerTraits.takingAmountGetter"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.preInteraction' label='preInteraction'></StringField>
 
-                        <div className="field-container">
-                          <label htmlFor="parsedExtension.customData"> customData:</label>
-                          <input type="text"
-                                 {...parsedOrderForm.register('parsedExtension.customData')}
-                                 id="makerTraits.customData"></input>
-                        </div>
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.makingAmountGetter' label='makingAmountGetter'></StringField>
+
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.takingAmountGetter' label='takingAmountGetter'></StringField>
+
+                    <StringField formInstance={parsedOrderForm}
+                                 name='parsedExtension.customData' label='customData'></StringField>
                 </div>
             </div>
         </>

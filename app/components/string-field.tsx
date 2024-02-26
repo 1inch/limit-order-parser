@@ -17,10 +17,10 @@ export default function StringField<
   }: { formInstance: FieldType<Form, TContext, TTransformedValues>, name: Path<Form>, label: string }
 ) {
   return (
-    <div className="field-container w-full flex">
-      <label htmlFor={name}>{label}: </label>
+    <div className="field-container w-full flex items-center">
+      <label htmlFor={name} className='text-1inch-text-1'>{label}: </label>
       <input id={name}
-             className="flex-1"
+             className="flex-1 bg-1inch-bg-1 p-4 rounded-2xl"
              {...formInstance.register(name)}></input>
     </div>
   )
