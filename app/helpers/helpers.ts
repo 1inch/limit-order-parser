@@ -1,18 +1,17 @@
 import Web3 from "web3";
 import {
-    EIP712TypedData,
-    LimitOrderBuilder, LimitOrderProtocolFacade, ParsedMakerTraits,
-    PROTOCOL_NAME,
-    PROTOCOL_VERSION,
-    ProviderConnector, Web3ProviderConnector
+  EIP712TypedData,
+  LimitOrderBuilder,
+  LimitOrderProtocolFacade,
+  ParsedMakerTraits,
+  PROTOCOL_NAME,
+  PROTOCOL_VERSION,
+  ProviderConnector,
+  Web3ProviderConnector
 } from "@1inch/limit-order-protocol-utils";
+import { contractAddresses } from "@/app/helpers/contracts";
 
 export type FormattedMakerTraits = Omit<ParsedMakerTraits, 'nonce' | 'series'> & { nonce: number, series: number };
-
-const addressMap = new Map([
-    [1, '0xc6f9b19e2e91a8cd3b7ff62aa68e4de8f7cdddbc'],
-    [137, '0xdc49a6e76f017175ba46e5038a4df6606d961ff3']
-])
 
 let web3: Web3 | null = null;
 let facade: LimitOrderProtocolFacade | null = null;
@@ -36,7 +35,7 @@ export async function  connectWeb3() {
 export async function getWeb3Data() {
     await connectWeb3();
     const networkId = await web3?.eth.net.getId()!;
-    const contractAddress = addressMap.get(networkId ?? 1)!;
+    const contractAddress = contractAddresses.get(networkId ?? 1)!;
     const currentAddress = await web3?.eth.getAccounts();
 
     return {
