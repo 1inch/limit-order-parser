@@ -109,7 +109,9 @@ export default function Parser() {
                           {...orderForm.register('order')}
                           placeholder="Put order structure here"
                 ></textarea>
-                <div className='flex justify-center flex-1'><InchButton className='w-1/2'>Parse</InchButton></div>
+                <div className='flex justify-center flex-1'>
+                  <InchButton type='submit' className='w-1/2'>Parse</InchButton>
+                </div>
               </div>
             </form>
 
