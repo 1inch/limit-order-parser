@@ -5,6 +5,7 @@ import {omit} from "next/dist/shared/lib/router/utils/omit";
 import React from "react";
 import StringField from "@/app/components/string-field";
 import InchButton from "@/app/components/inch-button";
+import RenderIfWalletIsConnected from "@/app/components/render-if-wallet-is-connected";
 
 const ethereumOrderMockWithPredicate = {
   "salt": "189791213515228772493723881274800954614876732216",
@@ -109,7 +110,11 @@ export default function Parser() {
                           {...orderForm.register('order')}
                           placeholder="Put order structure here"
                 ></textarea>
-                <div className='flex justify-center flex-1'><InchButton className='w-1/2'>Parse</InchButton></div>
+                <div className='flex justify-center flex-1'>
+                  <RenderIfWalletIsConnected
+                    ifConnected={<InchButton className='w-1/2'>Parse</InchButton>}
+                    ifNotConnected={<InchButton className='w-1/2'>Connect wallet</InchButton>}/>
+                </div>
               </div>
             </form>
 

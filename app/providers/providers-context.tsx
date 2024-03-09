@@ -9,7 +9,7 @@ export interface ProviderContextType {
   providers: ProvidersMap;
   activeProvider: ProviderInstance | null;
   setActiveProvider: (Provider: ProviderInstance | null) => void;
-  addProvider: (provider: ProviderInstance) => void;
+  addProvider: (provider: EIP6963AnnounceProviderEvent) => void;
 }
 
 const ProviderContext = createContext<ProviderContextType | undefined>(undefined);
