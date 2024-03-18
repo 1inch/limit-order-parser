@@ -1,7 +1,19 @@
 import Provider, { useProvider } from "@/app/providers/providers-context";
 import { ReactNode } from "react";
 
-export default function RenderIfWalletIsConnected({
+export default function RenderIfWalletIsConnected(props: {
+  ifConnected: ReactNode,
+  ifNotConnected: ReactNode,
+}) {
+
+  return (
+    <Provider>
+      <Main {...props}/>
+    </Provider>
+  );
+}
+
+function Main({
   ifConnected,
   ifNotConnected
 }: {
@@ -9,14 +21,11 @@ export default function RenderIfWalletIsConnected({
   ifNotConnected: ReactNode,
 }) {
   const { activeProvider } = useProvider();
-
-  return (
-    <Provider>
-      {
-        activeProvider
-          ? ifConnected
-          : ifNotConnected
-      }
-    </Provider>
-  );
+  return (<>
+    {
+      activeProvider
+        ? ifConnected
+        : ifNotConnected
+    }
+  </>)
 }

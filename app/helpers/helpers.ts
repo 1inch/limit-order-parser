@@ -2,7 +2,7 @@ import Web3 from "web3";
 import {
   EIP712TypedData,
   LimitOrderBuilder,
-  LimitOrderProtocolFacade,
+  LimitOrderProtocolFacade, LimitOrderV3Builder,
   ParsedMakerTraits,
   PROTOCOL_NAME,
   PROTOCOL_VERSION,
@@ -73,6 +73,16 @@ export function getLimitOrderBuilder() {
         }
     );
     return builder;
+}
+
+export function getLimitOrderBuilderV3() {
+  return new LimitOrderV3Builder(
+    createProviderConnector(),
+    {
+      version: '1inch Aggregation Router',
+      domainName: '5',
+    }
+  )
 }
 
 export function getProvideConnector() {
