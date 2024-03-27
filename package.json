@@ -14,8 +14,6 @@
     "host-github-pages": "bundle exec jekyll s --source out --destination _site --config _config.yml"
   },
   "devDependencies": {
-    "@1inch/fusion-sdk": "^0.1.8",
-    "@1inch/limit-order-protocol-utils": "4.0.21-alpha",
     "@babel/core": "^7.22.11",
     "@babel/preset-env": "^7.22.14",
     "@types/node": "latest",
@@ -42,6 +40,8 @@
   },
   "dependencies": {
     "@headlessui/react": "^1.7.18",
+    "@1inch/limit-order-protocol-utils": "4.0.1",
+    "ethers": "6.11.1",
     "axios": "^1.5.0",
     "lodash": "^4.17.21",
     "next": "latest",

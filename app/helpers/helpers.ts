@@ -2,7 +2,7 @@ import Web3 from "web3";
 import {
   EIP712TypedData,
   LimitOrderBuilder,
-  LimitOrderProtocolFacade, LimitOrderV3Builder,
+  LimitOrderProtocolFacade, LimitOrderProtocolV3Facade, LimitOrderV3Builder,
   ParsedMakerTraits,
   PROTOCOL_NAME,
   PROTOCOL_VERSION,
@@ -15,6 +15,7 @@ export type FormattedMakerTraits = Omit<ParsedMakerTraits, 'nonce' | 'series'> &
 
 let web3: Web3 | null = null;
 let facade: LimitOrderProtocolFacade | null = null;
+let facadeV3: LimitOrderProtocolV3Facade | null = null;
 export async function  connectWeb3() {
     if (web3) {
         return;
@@ -33,16 +34,19 @@ export async function  connectWeb3() {
 }
 
 export async function getWeb3Data() {
-    await connectWeb3();
-    const networkId = await web3?.eth.net.getId()!;
-    const contractAddress = contractAddresses.get(networkId ?? 1)!;
-    const currentAddress = await web3?.eth.getAccounts();
+  await connectWeb3();
+  const networkId = await web3?.eth.net.getId()!;
+  const contractAddress = contractAddresses.get(networkId ?? 1)!;
+  // todo fix hardcode
+  const contractAddressV3 = '0x1111111254EEB25477B68fb85Ed929f73A960582';
+  const currentAddress = await web3?.eth.getAccounts();
 
-    return {
-        networkId,
-        contractAddress,
-        maker: currentAddress?.[0],
-    }
+  return {
+    networkId,
+    contractAddress,
+    contractAddressV3,
+    maker: currentAddress?.[0],
+  }
 }
 
 export function createProviderConnector(): ProviderConnector {
@@ -98,6 +102,18 @@ export async function getLimitOrderFacade() {
     const connector = getProvideConnector();
     return  new LimitOrderProtocolFacade(
         contractAddress!, networkId, connector
+    );
+}
+
+export async function getLimitOrderFacadeV3() {
+    if (facadeV3) {
+        return facadeV3;
+    }
+
+    const { networkId, contractAddressV3 } = await getWeb3Data();
+    const connector = getProvideConnector();
+    return  new LimitOrderProtocolV3Facade(
+      contractAddressV3, networkId, connector
     );
 }
 
