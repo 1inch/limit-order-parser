@@ -11,7 +11,10 @@ const config: Config = {
       colors: {
         '1inch-bg-1': '#0b121f',
         '1inch-bg-2': '#131823',
+        '1inch-bg-3': 'rgba(47, 138, 245, .32)',
         '1inch-text-1': '#fff',
+        '1inch-text-2': '#2f8af5',
+        'btn-active-color-2': 'rgba(47, 138, 245, .4)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

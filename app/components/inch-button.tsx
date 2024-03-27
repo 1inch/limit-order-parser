@@ -1,4 +1,4 @@
-import React, { ButtonHTMLAttributes, HTMLAttributes } from "react";
+import React, { ButtonHTMLAttributes } from "react";
 
 export default function InchButton(
   {
@@ -7,10 +7,9 @@ export default function InchButton(
     ...props
 }: {
   children: React.ReactNode
-} & HTMLAttributes<HTMLElement>) {
+} & ButtonHTMLAttributes<HTMLElement>) {
   return (
-    <button type={'submit'}
-            className={`${className} bg-btn-color p-4 rounded-2xl hover:bg-btn-active-color`} {...props}>
+    <button className={`${className} bg-btn-color p-4 rounded-2xl hover:bg-btn-active-color`} {...props}>
       {children}
     </button>
   )
