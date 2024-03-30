@@ -68,6 +68,7 @@ export default function Parser() {
         } as FormattedMakerTraits;
 
         const facade = await getLimitOrderFacade();
+        debugger
 
         const orderHash = await facade.orderHash(order);
 
