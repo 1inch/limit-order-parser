@@ -14,6 +14,7 @@
     "host-github-pages": "bundle exec jekyll s --source out --destination _site --config _config.yml"
   },
   "devDependencies": {
+    "@1inch/solidity-utils": "3.5.5",
     "@babel/core": "^7.22.11",
     "@babel/preset-env": "^7.22.14",
     "@types/node": "latest",
@@ -39,10 +40,10 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.18",
     "@1inch/limit-order-protocol-utils": "4.0.1",
-    "ethers": "6.11.1",
+    "@headlessui/react": "^1.7.18",
     "axios": "^1.5.0",
+    "ethers": "6.11.1",
     "lodash": "^4.17.21",
     "next": "latest",
     "node-polyfill-webpack-plugin": "^2.0.1",
