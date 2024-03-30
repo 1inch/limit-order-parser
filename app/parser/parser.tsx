@@ -5,6 +5,8 @@ import {omit} from "next/dist/shared/lib/router/utils/omit";
 import React from "react";
 import StringField from "@/app/components/string-field";
 import InchButton from "@/app/components/inch-button";
+import RenderIfWalletIsConnected from "@/app/components/render-if-wallet-is-connected";
+import ConnectWalletBtn from "@/app/components/connect-wallet-btn";
 
 const ethereumOrderMockWithPredicate = {
   "salt": "189791213515228772493723881274800954614876732216",
@@ -17,18 +19,6 @@ const ethereumOrderMockWithPredicate = {
   "makerTraits": "0x420000000000000000000000000000000000654d4ee100000000000000000000",
   "extension": "0x000000f4000000f4000000f40000000000000000000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000cd4060fa7b5164281f150fa290181401524ef76f000000000000000000000000c6f9b19e2e91a8cd3b7ff62aa68e4de8f7cdddbcffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000654d4edb000000000000000000000000000000000000000000000000000000000000001bc772358d7d01f6823a0ace7d5b90dedd996c738c92368d49fe01744d68506807108479337967b5b549891e174ffece7b2414c041962d27b8b441600aaed51782"
 }
-
-const orderMock = {
-    "salt": "24772380956908715502473767112441541420167429817584581067853599066994352650684",
-    "maker": "0xcd4060fa7b5164281f150fa290181401524ef76f",
-    "receiver": "0x0000000000000000000000000000000000000000",
-    "makerAsset": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174",
-    "takerAsset": "0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
-    "makingAmount": "2000000",
-    "takingAmount": "2000000000000000000",
-    "makerTraits": "0x40000000000000000000000000000000000065231de700000000000000000000",
-    "extension": "0x"
-};
 
 type CreateExtensionParams = NonNullable<Parameters<LimitOrderBuilder['buildLimitOrder']>[1]>;
 type ExtensionParams = Required<CreateExtensionParams>;
@@ -57,6 +47,8 @@ export default function Parser() {
     const parsedOrderForm = useForm<ParsedOrder>();
 
     async function parseOrder(data: FieldValues) {
+
+
         let order: LimitOrder & { extension: string } | null = null;
         try {
             order = JSON.parse(data.order);
@@ -76,6 +68,7 @@ export default function Parser() {
         } as FormattedMakerTraits;
 
         const facade = await getLimitOrderFacade();
+        debugger
 
         const orderHash = await facade.orderHash(order);
 
@@ -109,7 +102,11 @@ export default function Parser() {
                           {...orderForm.register('order')}
                           placeholder="Put order structure here"
                 ></textarea>
-                <div className='flex justify-center flex-1'><InchButton className='w-1/2'>Parse</InchButton></div>
+                <div className='flex justify-center flex-1'>
+                  <RenderIfWalletIsConnected
+                    ifConnected={<InchButton className='w-1/2'>Parse</InchButton>}
+                    ifNotConnected={<InchButton className='w-1/2'>Parse</InchButton>}/>
+                </div>
               </div>
             </form>
 

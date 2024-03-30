@@ -1,7 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import Link from "next/link";
-import React from "react";
+import { ReactNode } from "react";
 
 export const metadata: Metadata = {
   title: 'Limit order parser',
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <html lang="en">
@@ -20,6 +20,7 @@ export default function RootLayout({
                <ul className='flex flex-row'>
                    {/*<li><Link href="/builder">Builder</Link></li>*/}
                    <li className='ml-5'><Link href="/">Parser</Link></li>
+                   <li className='ml-5'><Link href="/parser-v3">Parser v3 (demo)</Link></li>
                </ul>
             </nav>
         </header>

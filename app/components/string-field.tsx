@@ -13,7 +13,7 @@ export default function StringField<
   {
     formInstance,
     name,
-    label
+    label,
   }: { formInstance: FieldType<Form, TContext, TTransformedValues>, name: Path<Form>, label: string }
 ) {
   return (
