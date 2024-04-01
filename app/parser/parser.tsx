@@ -68,7 +68,6 @@ export default function Parser() {
         } as FormattedMakerTraits;
 
         const facade = await getLimitOrderFacade();
-        debugger
 
         const orderHash = await facade.orderHash(order);
 
@@ -111,13 +110,13 @@ export default function Parser() {
             </form>
 
             <div className="grid grid-cols-1 gap-1 p-10">
-                <StringField formInstance={parsedOrderForm} name='makerAsset' label='Maker asset'></StringField>
-                <StringField formInstance={parsedOrderForm} name='takerAsset' label='TakerAsset'></StringField>
-                <StringField formInstance={parsedOrderForm} name='orderHash' label='Order hash'></StringField>
+                <StringField readOnly formInstance={parsedOrderForm} name='makerAsset' label='Maker asset'></StringField>
+                <StringField readOnly formInstance={parsedOrderForm} name='takerAsset' label='TakerAsset'></StringField>
+                <StringField readOnly formInstance={parsedOrderForm} name='orderHash' label='Order hash'></StringField>
                 <div className="border rounded-2xl p-4 mt-4 grid grid-cols-1 gap-4">
                     <h5>Maker traits:</h5>
 
-                  <StringField formInstance={parsedOrderForm}
+                  <StringField readOnly formInstance={parsedOrderForm}
                                name='parsedMakerTraits.allowedSender' label='Allowed sender'></StringField>
 
                     <div className="field-container">
@@ -205,12 +204,15 @@ export default function Parser() {
                     </div>
 
                   <StringField formInstance={parsedOrderForm}
+                               readOnly
                                name='parsedMakerTraits.expiry' label='Expiry'></StringField>
 
                   <StringField formInstance={parsedOrderForm}
+                               readOnly
                                name='parsedMakerTraits.nonce' label='Nonce'></StringField>
 
                   <StringField formInstance={parsedOrderForm}
+                               readOnly
                                name='parsedMakerTraits.series' label='Series'></StringField>
                 </div>
 
@@ -218,33 +220,43 @@ export default function Parser() {
                     <h5>Extension:</h5>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.permit' label='Permit'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.predicate' label='predicate'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.makerAssetSuffix' label='makerAssetSuffix'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.takerAssetSuffix' label='takerAssetSuffix'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.takerAssetSuffix' label='takerAssetSuffix'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.postInteraction' label='postInteraction'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.preInteraction' label='preInteraction'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.makingAmountGetter' label='makingAmountGetter'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.takingAmountGetter' label='takingAmountGetter'></StringField>
 
                     <StringField formInstance={parsedOrderForm}
+                                 readOnly
                                  name='parsedExtension.customData' label='customData'></StringField>
                 </div>
             </div>
