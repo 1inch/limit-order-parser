@@ -68,8 +68,6 @@ export default function Builder() {
             series: series ? BigInt(series) : undefined,
         });
 
-        debugger
-
         const order = builder.buildLimitOrder({
             ...orderData,
             makerTraits,
