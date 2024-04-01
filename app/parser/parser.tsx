@@ -95,7 +95,7 @@ export default function Parser() {
         <>
             <form className="grid grid-cols-1 gap-1" onSubmit={orderForm.handleSubmit((data) => parseOrder(data))}>
               <div className="flex flex-col gap-10">
-                <textarea className="bg-1inch-bg-1 p-4 rounded-2xl w-100%"
+                <textarea className="bg-1inch-bg-1 p-4 rounded-2xl w-100% outline-0"
                           style={{height: '370px'}}
                           defaultValue={JSON.stringify(ethereumOrderMockWithPredicate)}
                           {...orderForm.register('order')}
@@ -113,7 +113,7 @@ export default function Parser() {
                 <StringField readOnly formInstance={parsedOrderForm} name='makerAsset' label='Maker asset'></StringField>
                 <StringField readOnly formInstance={parsedOrderForm} name='takerAsset' label='TakerAsset'></StringField>
                 <StringField readOnly formInstance={parsedOrderForm} name='orderHash' label='Order hash'></StringField>
-                <div className="border rounded-2xl p-4 mt-4 grid grid-cols-1 gap-4">
+                <div className="rounded-2xl p-4 mt-4 grid grid-cols-1 gap-4">
                     <h5>Maker traits:</h5>
 
                   <StringField readOnly formInstance={parsedOrderForm}
@@ -216,7 +216,7 @@ export default function Parser() {
                                name='parsedMakerTraits.series' label='Series'></StringField>
                 </div>
 
-                <div className="rounded-2xl p-4 mt-4 border grid grid-cols-1 gap-4">
+                <div className="rounded-2xl p-4 mt-4 grid grid-cols-1 gap-4">
                     <h5>Extension:</h5>
 
                     <StringField formInstance={parsedOrderForm}

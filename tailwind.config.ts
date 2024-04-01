@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        '1inch-bg-1': '#0b121f',
+        '1inch-bg-1': '#06070a',
         '1inch-bg-2': '#131823',
         '1inch-bg-3': 'rgba(47, 138, 245, .32)',
         '1inch-text-1': '#fff',
