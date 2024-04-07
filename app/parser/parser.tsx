@@ -6,7 +6,6 @@ import React from "react";
 import StringField from "@/app/components/string-field";
 import InchButton from "@/app/components/inch-button";
 import RenderIfWalletIsConnected from "@/app/components/render-if-wallet-is-connected";
-import ConnectWalletBtn from "@/app/components/connect-wallet-btn";
 
 const ethereumOrderMockWithPredicate = {
   "salt": "189791213515228772493723881274800954614876732216",

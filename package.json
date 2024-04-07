@@ -41,10 +41,7 @@
   },
   "dependencies": {
     "@1inch/limit-order-protocol-utils": "4.0.1",
-    "@headlessui/react": "^1.7.18",
-    "axios": "^1.5.0",
     "ethers": "6.11.1",
-    "lodash": "^4.17.21",
     "next": "latest",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "react": "latest",

@@ -14,6 +14,7 @@ const config: Config = {
         '1inch-bg-3': 'rgba(47, 138, 245, .32)',
         '1inch-text-1': '#fff',
         '1inch-text-2': '#2f8af5',
+        '1inch-input-text-1': 'rgb(108, 134, 173)',
         'btn-active-color-2': 'rgba(47, 138, 245, .4)',
       },
       backgroundImage: {
