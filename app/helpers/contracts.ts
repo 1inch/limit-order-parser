@@ -25,4 +25,4 @@ export const contractAddresses: Map<EthChainId, string> = new Map([
   [EthChainId.klaytnMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
   [EthChainId.baseMainnet, '0x111111125421ca6dc452d289314280a0f8842a65'],
   [EthChainId.zkSyncEraMainnet, '0x6fd4383cb451173d5f9304f041c7bcbf27d561ff'],
-])
+]);
