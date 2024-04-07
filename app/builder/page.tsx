@@ -75,8 +75,8 @@ export default function Builder() {
         });
 
         const signature = await builder.buildTypedDataAndSign(
-            order.order,
-            networkId,
+            order,
+            BigInt(networkId),
             contractAddress,
             maker
         );
