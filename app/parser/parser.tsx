@@ -1,32 +1,35 @@
 import {Controller, FieldValues, useForm} from "react-hook-form";
 import { LimitOrder, LimitOrderBuilder, LimitOrderDecoder, ZX } from "@1inch/limit-order-protocol-utils";
-import {FormattedMakerTraits, getLimitOrderFacade} from "@/app/helpers/helpers";
+import { areAddressesEqual, FormattedMakerTraits, getLimitOrderFacade } from "@/app/helpers/helpers";
 import {omit} from "next/dist/shared/lib/router/utils/omit";
 import React from "react";
 import StringField from "@/app/components/string-field";
 import InchButton from "@/app/components/inch-button";
 import RenderIfWalletIsConnected from "@/app/components/render-if-wallet-is-connected";
+import { recoverAddress } from "ethers";
 
 const ethereumOrderMockWithPredicate = {
-  "salt": "189791213515228772493723881274800954614876732216",
   "maker": "0xcd4060fa7b5164281f150fa290181401524ef76f",
-  "receiver": "0x0000000000000000000000000000000000000000",
-  "makerAsset": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-  "takerAsset": "0x6b175474e89094c44da98b954eedeac495271d0f",
-  "makingAmount": "3000000",
-  "takingAmount": "3000000000000000000",
-  "makerTraits": "0x420000000000000000000000000000000000654d4ee100000000000000000000",
-  "extension": "0x000000f4000000f4000000f40000000000000000000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000cd4060fa7b5164281f150fa290181401524ef76f000000000000000000000000c6f9b19e2e91a8cd3b7ff62aa68e4de8f7cdddbcffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000654d4edb000000000000000000000000000000000000000000000000000000000000001bc772358d7d01f6823a0ace7d5b90dedd996c738c92368d49fe01744d68506807108479337967b5b549891e174ffece7b2414c041962d27b8b441600aaed51782"
+  "makerAsset": "0x9c9e5fd8bbc25984b178fdce6117defa39d2db39",
+  "takerAsset": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+  "makerTraits": "62419173104490761595518734106523177391962351931958729461099035058323207487488",
+  "salt": "102412815598624645945776585183142866624520148660939114470387183071274861343509",
+  "makingAmount": "561047938392911058",
+  "takingAmount": "716209452151640480",
+  "receiver": "0x0000000000000000000000000000000000000000"
 }
+
+const SIGNATURE ='0xbb90b0539373f6605b20c656250fc57a8ee6be5f50a5f01139d40b8518537d8d5e0a97950c05bd965aabda486aebd1dc7a831e9659e89086a44db3fb83d7b4f51b'
 
 type CreateExtensionParams = NonNullable<Parameters<LimitOrderBuilder['buildLimitOrder']>[1]>;
 type ExtensionParams = Required<CreateExtensionParams>;
 
 type ParsedOrder = Pick<LimitOrder, 'makerAsset' | 'takerAsset' | 'makingAmount' | 'takingAmount'> & {
-    parsedMakerTraits: FormattedMakerTraits;
-    orderHash: string;
-    extension: string;
-    parsedExtension: ExtensionParams;
+  isSignatureValid: boolean;
+  parsedMakerTraits: FormattedMakerTraits;
+  orderHash: string;
+  extension: string;
+  parsedExtension: ExtensionParams;
 }
 
 const defaultExtension: ExtensionParams = {
@@ -42,52 +45,58 @@ const defaultExtension: ExtensionParams = {
 }
 
 export default function Parser() {
-    const orderForm = useForm<{ order: string }>();
-    const parsedOrderForm = useForm<ParsedOrder>();
+  const orderForm = useForm<{ order: string, signature?: string }>({
+    defaultValues: {
+      order: JSON.stringify(ethereumOrderMockWithPredicate),
+      signature: SIGNATURE,
+    }
+  });
+  const parsedOrderForm = useForm<ParsedOrder>();
 
-    async function parseOrder(data: FieldValues) {
+  async function parseOrder(data: FieldValues) {
+    let order: LimitOrder & { extension: string } | null = null;
+    try {
+        order = JSON.parse(data.order);
+    } catch (e) {
+        alert(`Can't parse order`);
+    }
 
+    if (!order) {
+        return;
+    }
 
-        let order: LimitOrder & { extension: string } | null = null;
-        try {
-            order = JSON.parse(data.order);
-        } catch (e) {
-            alert(`Can't parse order`);
-        }
+    const parsedMakerTraits = LimitOrderDecoder.unpackMakerTraits(order.makerTraits);
+    const formattedMakerTraits = {
+        ...omit(parsedMakerTraits as any, ['nonce', 'series']),
+        nonce: Number(parsedMakerTraits.nonce),
+        series: Number(parsedMakerTraits.series),
+    } as FormattedMakerTraits;
 
-        if (!order) {
-            return;
-        }
+    const facade = await getLimitOrderFacade();
 
-        const parsedMakerTraits = LimitOrderDecoder.unpackMakerTraits(order.makerTraits);
-        const formattedMakerTraits = {
-            ...omit(parsedMakerTraits as any, ['nonce', 'series']),
-            nonce: Number(parsedMakerTraits.nonce),
-            series: Number(parsedMakerTraits.series),
-        } as FormattedMakerTraits;
+    const orderHash = await facade.orderHash(order);
 
-        const facade = await getLimitOrderFacade();
+    const parsedExtension = order.extension !== undefined && order.extension !== ZX
+      ? LimitOrderDecoder.unpackExtension(order.extension)
+      : { customData: ZX, interactions: {...defaultExtension} };
 
-        const orderHash = await facade.orderHash(order);
+    const extensionData: ExtensionParams =  {
+      ...defaultExtension,
+      ...parsedExtension.interactions,
+      customData: parsedExtension.customData,
+    };
 
-        const parsedExtension = order.extension !== ZX
-          ? LimitOrderDecoder.unpackExtension(order.extension)
-          : { customData: ZX, interactions: {...defaultExtension} };
+    const checkSignature = data.signature ? recoverAddress(orderHash, data.signature) : null;
 
-        const extensionData: ExtensionParams =  {
-          ...defaultExtension,
-          ...parsedExtension.interactions,
-          customData: parsedExtension.customData,
-        };
-
-        const { reset } = parsedOrderForm;
-        reset({
-            ...order,
-            orderHash,
-            parsedMakerTraits: formattedMakerTraits,
-            extension: order.extension,
-            parsedExtension: extensionData,
-        });
+    const { reset } = parsedOrderForm;
+    reset({
+      ...order,
+      isSignatureValid: checkSignature === null ? false : areAddressesEqual(checkSignature, order.maker),
+      orderHash,
+      parsedMakerTraits: formattedMakerTraits,
+      extension: order.extension,
+      parsedExtension: extensionData,
+    });
     }
 
     return (
@@ -96,10 +105,12 @@ export default function Parser() {
               <div className="flex flex-col gap-10">
                 <textarea className="bg-1inch-bg-1 p-4 rounded-2xl w-100% outline-0"
                           style={{height: '370px'}}
-                          defaultValue={JSON.stringify(ethereumOrderMockWithPredicate)}
                           {...orderForm.register('order')}
                           placeholder="Put order structure here"
                 ></textarea>
+
+                <StringField formInstance={orderForm}
+                             name='signature' label='Signature'></StringField>
                 <div className='flex justify-center flex-1'>
                   <RenderIfWalletIsConnected
                     ifConnected={<InchButton className='w-1/2'>Parse</InchButton>}
@@ -112,6 +123,21 @@ export default function Parser() {
                 <StringField readOnly formInstance={parsedOrderForm} name='makerAsset' label='Maker asset'></StringField>
                 <StringField readOnly formInstance={parsedOrderForm} name='takerAsset' label='TakerAsset'></StringField>
                 <StringField readOnly formInstance={parsedOrderForm} name='orderHash' label='Order hash'></StringField>
+
+                <div className="field-container">
+                  <label htmlFor="isSignatureValid">Is signature valid</label>
+                  <Controller
+                    name="isSignatureValid"
+                    control={parsedOrderForm.control}
+                    render={({ field }) => (
+                      <input type="checkbox"
+                             checked={field.value}
+                             readOnly
+                             id="isSignatureValid" value="false"></input>
+                    )}
+                  />
+                </div>
+
                 <div className="rounded-2xl p-4 mt-4 grid grid-cols-1 gap-4">
                     <h5>Maker traits:</h5>
 

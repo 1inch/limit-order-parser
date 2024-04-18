@@ -128,3 +128,6 @@ export async function getLimitOrderFacadeV3() {
     );
 }
 
+export function areAddressesEqual(address1: string, address2: string) {
+    return address1.toLowerCase() === address2.toLowerCase();
+}
